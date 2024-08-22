@@ -5,4 +5,9 @@ jobs:
     runs-on: ubuntu-latest
     name: test
     steps:
-      - uses: maxpixels64/deploy-nekoweb@test
+      - uses: maxpixels64/deploy-nekoweb@main
+        with:
+          nekoweb-api-key: ${{ secrets.NEKOWEB_API_KEY }}
+          nekoweb-cookie: ${{ secrets.NEKOWEB_COOKIE }}
+          nekoweb-folder: '/'
+          directory: 'public'
