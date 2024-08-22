@@ -12,7 +12,7 @@ inputs:
     description: 'The nekoweb folder to deploy to.'
     required: true
   directory:
-    description: 'The directory you would like to deploy.',
+    description: 'The directory you would like to deploy.'
     required: true
 
 runs:
