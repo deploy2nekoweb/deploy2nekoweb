@@ -1,0 +1,22 @@
+name: 'deploy 2 nekoweb'
+description: 'the definitive github action for deploying your site to nekoweb!!!'
+
+inputs:
+  nekoweb-api-key:
+    description: 'Your nekoweb API key.'
+    required: true
+  nekoweb-cookie:
+    description: 'Your nekoweb cookie. (Required for Recently Updated feature)'
+    required: false
+  nekoweb-folder:
+    description: 'The nekoweb folder to deploy to.'
+    required: true
+  directory:
+    description: 'The directory you would like to deploy.',
+    required: true
+
+runs:
+  using: 'composite'
+  steps:
+    - uses: oven-sh/setup-bun@v2
+    - run: bun run index.js
