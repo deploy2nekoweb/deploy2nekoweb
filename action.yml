@@ -19,9 +19,12 @@ runs:
   using: 'composite'
   steps:
     - uses: oven-sh/setup-bun@v2
-    - run: bun run index.ts
+    - run: |
+        if [ -n "${{ inputs.nekoweb-cookie }}" ]; then
+          export NEKOWEB_COOKIE="${{ inputs.nekoweb-cookie }}"
+        fi
+        bun run index.ts
       env:
         NEKOWEB_API_KEY: ${{ inputs.nekoweb-api-key }}
-        NEKOWEB_COOKIE: ${{ inputs.nekoweb-cookie }}
         NEKOWEB_FOLDER: ${{ inputs.nekoweb-folder }}
         DIRECTORY: ${{ inputs.directory }}
