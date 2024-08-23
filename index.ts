@@ -76,6 +76,9 @@ for await (const chunk of stream) {
 
 console.log("Uploaded", uploadedBytes, "bytes")
 
-// do ur stuff max
+await genericRequest(`/files/import/${uploadId}`, {
+  method: "POST",
+  headers: { Authorization: NEKOWEB_API_KEY },
+});
 
 fs.rmSync(path.join(__dirname, `${uuid}.zip`))
