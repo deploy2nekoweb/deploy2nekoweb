@@ -10,6 +10,7 @@
   },
   "dependencies": {
     "dotenv": "^16.4.5",
-    "form-data": "^4.0.0"
+    "form-data": "^4.0.0",
+    "zip-a-folder": "^3.1.7"
   }
 }

@@ -1,6 +1,7 @@
 import fs from 'fs'
 import FormData from 'form-data';
 import path from 'path'
+import { zip } from 'zip-a-folder'
 
 const API_URL = "https://nekoweb.org/api"
 
@@ -48,7 +49,9 @@ console.log(chunkSize)
 
 let uploadedBytes = 0
 
-const stream = fs.createReadStream(path.join(__dirname, DIRECTORY), { highWaterMark: chunkSize });
+const uuid = crypto.randomUUID()
+await zip(path.join(__dirname, DIRECTORY), `${uuid}.zip`)
+const stream = fs.createReadStream(path.join(__dirname, `${uuid}.zip`), { highWaterMark: chunkSize });
 let chunkIndex = 0;
 
 for await (const chunk of stream) {
@@ -72,3 +75,7 @@ for await (const chunk of stream) {
 }
 
 console.log("Uploaded", uploadedBytes, "bytes")
+
+// do ur stuff max
+
+fs.rmSync(path.join(__dirname, `${uuid}.zip`))
