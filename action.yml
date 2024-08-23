@@ -23,6 +23,7 @@ runs:
         if [ -n "${{ inputs.nekoweb-cookie }}" ]; then
           export NEKOWEB_COOKIE="${{ inputs.nekoweb-cookie }}"
         fi
+        cd ../
         bun install
         bun run ./index.ts
       shell: bash
