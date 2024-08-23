@@ -21,7 +21,7 @@ console.log("Uploading files to Nekoweb...")
 
 const genericRequest = async (url: string, options: RequestInit): Promise<Response> => {
   const response = await fetch(API_URL + url, options)
-  if (!response.ok) throw new Error(`Failed to fetch ${url}`)
+  if (!response.ok) throw new Error(`Failed to fetch ${url}\n${response.statusText}\n${await response.text()}`)
   return response
 }
 
@@ -77,6 +77,12 @@ for await (const chunk of stream) {
 }
 
 console.log("Uploaded", uploadedBytes, "bytes")
+
+await genericRequest(`/files/delete`, {
+  method: "POST",
+  headers: { 'Content-Type': 'application/x-www-form-urlencoded', Authorization: NEKOWEB_API_KEY },
+  body: JSON.stringify({ pathname: `${NEKOWEB_FOLDER}` })
+})
 
 await genericRequest(`/files/import/${uploadId}`, {
   method: "POST",
