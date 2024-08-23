@@ -31,7 +31,10 @@ const uploadId = await genericRequest("/files/big/create", {
 
 console.log("Upload ID:", uploadId)
 
-const fileSize = await fs.promises.stat(path.join(__dirname, DIRECTORY)).then(stats => stats.size);
+const uuid = crypto.randomUUID()
+await zip(path.join(__dirname, DIRECTORY), `${uuid}.zip`)
+
+const fileSize = await fs.promises.stat(path.join(__dirname, `${uuid}.zip`)).then(stats => stats.size);
 let numberOfChunks = Math.ceil(fileSize / MAX_CHUNK_SIZE);
 let chunkSize = Math.ceil(fileSize / numberOfChunks);
 
@@ -49,8 +52,7 @@ console.log(chunkSize)
 
 let uploadedBytes = 0
 
-const uuid = crypto.randomUUID()
-await zip(path.join(__dirname, DIRECTORY), `${uuid}.zip`)
+
 const stream = fs.createReadStream(path.join(__dirname, `${uuid}.zip`), { highWaterMark: chunkSize });
 let chunkIndex = 0;
 
