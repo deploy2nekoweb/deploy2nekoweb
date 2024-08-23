@@ -18,14 +18,14 @@ inputs:
 runs:
   using: 'composite'
   steps:
+    - uses: actions/checkout@v4
     - uses: oven-sh/setup-bun@v2
     - run: |
         if [ -n "${{ inputs.nekoweb-cookie }}" ]; then
           export NEKOWEB_COOKIE="${{ inputs.nekoweb-cookie }}"
         fi
-        cd ../
         bun install
-        bun run ./index.ts
+        bun run index.ts
       shell: bash
       env:
         NEKOWEB_API_KEY: ${{ inputs.nekoweb-api-key }}
