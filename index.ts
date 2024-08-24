@@ -78,10 +78,14 @@ for await (const chunk of stream) {
 
 console.log("Uploaded", uploadedBytes, "bytes")
 
+const encodedParams = new URLSearchParams();
+
+encodedParams.set('pathname', NEKOWEB_FOLDER);
+
 await genericRequest(`/files/delete`, {
   method: "POST",
   headers: { 'Content-Type': 'application/x-www-form-urlencoded', Authorization: NEKOWEB_API_KEY },
-  body: JSON.stringify({ pathname: `${NEKOWEB_FOLDER}` })
+  body: encodedParams
 })
 
 await genericRequest(`/files/import/${uploadId}`, {
