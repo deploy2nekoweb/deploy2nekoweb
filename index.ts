@@ -1,35 +1,49 @@
-import fs from 'fs'
+import fs from 'fs';
 import FormData from 'form-data';
-import path from 'path'
-import { zip } from 'zip-a-folder'
+import path from 'path';
+import { zip } from 'zip-a-folder';
+import axios from 'axios';
 
-const API_URL = "https://nekoweb.org/api"
+const API_URL = "https://nekoweb.org/api";
 
-const { NEKOWEB_API_KEY, NEKOWEB_FOLDER, DIRECTORY } = process.env
-if (!NEKOWEB_API_KEY) throw new Error("API key not found")
-if (!NEKOWEB_FOLDER) throw new Error("Folder not found")
-if (!DIRECTORY) throw new Error("Directory not found")
+const { NEKOWEB_API_KEY, NEKOWEB_FOLDER, DIRECTORY } = process.env;
+if (!NEKOWEB_API_KEY) throw new Error("API key not found");
+if (!NEKOWEB_FOLDER) throw new Error("Folder not found");
+if (!DIRECTORY) throw new Error("Directory not found");
 
 const MAX_CHUNK_SIZE = Number(process.env.MAX_CHUNK_SIZE) || 100 * 1024 * 1024;
 const MIN_CHUNK_SIZE = Number(process.env.MIN_CHUNK_SIZE) || 10 * 1024 * 1024;
 const MIN_CHUNKS = Number(process.env.MIN_CHUNKS) || 5;
 
-console.log("Uploading files to Nekoweb...")
+console.log("Uploading files to Nekoweb...");
 
-const genericRequest = async (url: string, options: RequestInit): Promise<Response> => {
-  const response = await fetch(API_URL + url, options)
-  if (!response.ok) console.error(`Failed to fetch ${url}\n${response.statusText}\n${await response.text()}`)
-  return response
-}
+const genericRequest = async (url: string, options: any): Promise<any> => {
+  try {
+    const response = await axios({
+      url: API_URL + url,
+      ...options
+    });
+    return response.data;
+  } catch (error) {
+    console.error(`Failed to fetch ${url}\n${error.message}\n${error.response?.data}`);
+    throw error;
+  }
+};
 
+// Create an upload session
 const uploadId = await genericRequest("/files/big/create", {
+  method: 'GET',
   headers: { Authorization: NEKOWEB_API_KEY }
-}).then(res => res.json()).then(data => data.id)
+}).then(data => data.id);
 
-console.log("Upload ID:", uploadId)
-await zip(path.join(__dirname, DIRECTORY), `${path.basename(NEKOWEB_FOLDER)}.zip`)
+console.log("Upload ID:", uploadId);
 
-const fileSize = await fs.promises.stat(path.join(__dirname, `${path.basename(NEKOWEB_FOLDER)}.zip`)).then(stats => stats.size);
+// Zip the folder
+const zipPath = path.join(__dirname, `${path.basename(NEKOWEB_FOLDER)}.zip`);
+await zip(path.join(__dirname, DIRECTORY), zipPath);
+
+// Get the file size
+const fileSize = (await fs.promises.stat(zipPath)).size;
 let numberOfChunks = Math.ceil(fileSize / MAX_CHUNK_SIZE);
 let chunkSize = Math.ceil(fileSize / numberOfChunks);
 
@@ -43,12 +57,10 @@ if (numberOfChunks < MIN_CHUNKS) {
   chunkSize = Math.ceil(fileSize / numberOfChunks);
 }
 
-console.log(chunkSize)
+console.log("Chunk Size:", chunkSize);
 
-let uploadedBytes = 0
-
-
-const stream = fs.createReadStream(path.join(__dirname, `${path.basename(NEKOWEB_FOLDER)}.zip`), { highWaterMark: chunkSize });
+let uploadedBytes = 0;
+const stream = fs.createReadStream(zipPath, { highWaterMark: chunkSize });
 let chunkIndex = 0;
 
 for await (const chunk of stream) {
@@ -62,20 +74,24 @@ for await (const chunk of stream) {
       ...formData.getHeaders(),
       Authorization: NEKOWEB_API_KEY
     },
-    body: formData.getBuffer()
-  })
+    data: formData
+  });
 
-  console.log(chunk)
+  console.log(`Uploaded chunk ${chunkIndex}`);
 
-  uploadedBytes += chunk.length
-  chunkIndex++
+  uploadedBytes += chunk.length;
+  chunkIndex++;
 }
 
-console.log("Uploaded", uploadedBytes, "bytes")
+console.log("Uploaded", uploadedBytes, "bytes");
 
+// Finalize the upload
 await genericRequest(`/files/import/${uploadId}`, {
   method: "POST",
   headers: { Authorization: NEKOWEB_API_KEY },
 });
 
-fs.rmSync(path.join(__dirname, `${path.basename(NEKOWEB_FOLDER)}.zip`))
+// Clean up the zip file
+fs.rmSync(zipPath);
+
+console.log("Upload completed and cleaned up.");
