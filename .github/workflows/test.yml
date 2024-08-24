@@ -6,7 +6,7 @@ jobs:
     name: test
     steps:
       - uses: actions/checkout@v4
-      - uses: maxpixels64/deploy-nekoweb@main
+      - uses: deploy2nekoweb/deploy2nekoweb@main
         with:
           nekoweb-api-key: ${{ secrets.NEKOWEB_API_KEY }}
           nekoweb-cookie: ${{ secrets.NEKOWEB_COOKIE }}
