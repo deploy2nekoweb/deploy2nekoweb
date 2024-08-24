@@ -95,6 +95,13 @@ const uploadToNekoweb = async () => {
 
   console.log(`Uploaded ${uploadedBytes} bytes`);
 
+  try {
+    await genericRequest('/files/delete', {
+      method: 'POST',
+      headers: { Authorization: NEKOWEB_API_KEY, 'Content-Type': 'application/x-www-form-urlencoded' },
+      data: 'pathname=' + NEKOWEB_FOLDER
+    })
+  } catch(e) {}
   // Finalize the upload
   try {
     await genericRequest(`/files/import/${uploadId}`, {
