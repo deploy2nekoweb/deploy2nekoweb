@@ -65,11 +65,11 @@ const uploadToNekoweb = async () => {
   let chunkIndex = 0;
 
   for await (const chunk of stream) {
-    console.log(`Uploading chunk ${chunkIndex}...`);
+    console.log(`Uploading chunk ${chunkIndex} with size ${chunk.length}...`);
 
     const formData = new FormData();
     formData.append('id', uploadId);
-    formData.append('file', chunk, { filename: `chunk_${chunkIndex}` });
+    formData.append('file', chunk, { filename: `chunk_${chunkIndex}.part` });
 
     try {
       await genericRequest("/files/big/append", {
