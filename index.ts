@@ -14,9 +14,6 @@ const MAX_CHUNK_SIZE = Number(process.env.MAX_CHUNK_SIZE) || 100 * 1024 * 1024;
 const MIN_CHUNK_SIZE = Number(process.env.MIN_CHUNK_SIZE) || 10 * 1024 * 1024;
 const MIN_CHUNKS = Number(process.env.MIN_CHUNKS) || 5;
 
-const localFolder = "/public"
-const nekowebFolder = "/public"
-
 console.log("Uploading files to Nekoweb...")
 
 const genericRequest = async (url: string, options: RequestInit): Promise<Response> => {
@@ -53,7 +50,7 @@ console.log(chunkSize)
 let uploadedBytes = 0
 
 
-const stream = fs.createReadStream(path.join(__dirname, `${path.basename(NEKOWEB_FOLDER}.zip`), { highWaterMark: chunkSize });
+const stream = fs.createReadStream(path.join(__dirname, `${path.basename(NEKOWEB_FOLDER)}.zip`), { highWaterMark: chunkSize });
 let chunkIndex = 0;
 
 for await (const chunk of stream) {
