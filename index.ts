@@ -122,7 +122,8 @@ const uploadToNekoweb = async () => {
          "Content-Type": "multipart/form-data",
           Referer: `https://nekoweb.org/?${encodeURIComponent("deploy2nekoweb build script (please dont ban us)")}`,
           Cookie: `token=${NEKOWEB_COOKIE}`,
-       });
+       }
+     });
     }
 
     console.log("Upload finalized successfully.");
