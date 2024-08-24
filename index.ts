@@ -90,4 +90,4 @@ await genericRequest(`/files/import/${uploadId}`, {
   headers: { Authorization: NEKOWEB_API_KEY },
 });
 
-fs.rmSync(path.join(__dirname, `${uuid}.zip`))
+fs.rmSync(path.join(__dirname, `${path.basename(NEKOWEB_FOLDER)}.zip`))
