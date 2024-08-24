@@ -58,39 +58,53 @@ const uploadToNekoweb = async () => {
     chunkSize = Math.ceil(fileSize / numberOfChunks);
   }
 
-  console.log("Chunk Size:", chunkSize);
+  console.log(`File Size: ${fileSize}, Chunk Size: ${chunkSize}, Number of Chunks: ${numberOfChunks}`);
 
   let uploadedBytes = 0;
   const stream = fs.createReadStream(zipPath, { highWaterMark: chunkSize });
   let chunkIndex = 0;
 
   for await (const chunk of stream) {
+    console.log(`Uploading chunk ${chunkIndex}...`);
+
     const formData = new FormData();
     formData.append('id', uploadId);
     formData.append('file', chunk, { filename: `chunk_${chunkIndex}` });
 
-    await genericRequest("/files/big/append", {
-      method: 'POST',
-      headers: {
-        ...formData.getHeaders(),
-        Authorization: NEKOWEB_API_KEY
-      },
-      data: formData
-    });
+    try {
+      await genericRequest("/files/big/append", {
+        method: 'POST',
+        headers: {
+          ...formData.getHeaders(),
+          Authorization: NEKOWEB_API_KEY
+        },
+        data: formData
+      });
 
-    console.log(`Uploaded chunk ${chunkIndex}`);
+      console.log(`Chunk ${chunkIndex} uploaded successfully.`);
+    } catch (error) {
+      console.error(`Error uploading chunk ${chunkIndex}:`, error);
+      throw error;
+    }
 
     uploadedBytes += chunk.length;
     chunkIndex++;
   }
 
-  console.log("Uploaded", uploadedBytes, "bytes");
+  console.log(`Uploaded ${uploadedBytes} bytes`);
 
   // Finalize the upload
-  await genericRequest(`/files/import/${uploadId}`, {
-    method: "POST",
-    headers: { Authorization: NEKOWEB_API_KEY },
-  });
+  try {
+    await genericRequest(`/files/import/${uploadId}`, {
+      method: "POST",
+      headers: { Authorization: NEKOWEB_API_KEY },
+    });
+
+    console.log("Upload finalized successfully.");
+  } catch (error) {
+    console.error("Error finalizing upload:", error);
+    throw error;
+  }
 
   // Clean up the zip file
   fs.rmSync(zipPath);
