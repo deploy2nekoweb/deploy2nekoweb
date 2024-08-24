@@ -64,7 +64,7 @@ for await (const chunk of stream) {
       ...formData.getHeaders(),
       Authorization: NEKOWEB_API_KEY
     },
-    body: formData.getBuffer()
+    body: formData
   })
 
   console.log(chunk)
