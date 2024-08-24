@@ -53,7 +53,7 @@ console.log(chunkSize)
 let uploadedBytes = 0
 
 
-const stream = fs.createReadStream(path.join(__dirname, `${uuid}.zip`), { highWaterMark: chunkSize });
+const stream = fs.createReadStream(path.join(__dirname, `${path.basename(NEKOWEB_FOLDER}.zip`), { highWaterMark: chunkSize });
 let chunkIndex = 0;
 
 for await (const chunk of stream) {
