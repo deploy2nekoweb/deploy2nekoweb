@@ -44,7 +44,8 @@ const uploadToNekoweb = async () => {
   await zip(path.join(__dirname, DIRECTORY), zipPath);
 
   // Get the file size
-  const fileSize = (await fs.promises.stat(zipPath)).size;
+  const fileBuffer = await fs.promises.readFile(zipPath);
+  const fileSize = fileBuffer.length;
   let numberOfChunks = Math.ceil(fileSize / MAX_CHUNK_SIZE);
   let chunkSize = Math.ceil(fileSize / numberOfChunks);
 
@@ -61,10 +62,12 @@ const uploadToNekoweb = async () => {
   console.log(`File Size: ${fileSize}, Chunk Size: ${chunkSize}, Number of Chunks: ${numberOfChunks}`);
 
   let uploadedBytes = 0;
-  const stream = fs.createReadStream(zipPath, { highWaterMark: chunkSize });
-  let chunkIndex = 0;
 
-  for await (const chunk of stream) {
+  for (let chunkIndex = 0; chunkIndex < numberOfChunks; chunkIndex++) {
+    const start = chunkIndex * chunkSize;
+    const end = Math.min(start + chunkSize, fileSize);
+    const chunk = fileBuffer.slice(start, end);
+
     console.log(`Uploading chunk ${chunkIndex} with size ${chunk.length}...`);
 
     const formData = new FormData();
@@ -88,7 +91,6 @@ const uploadToNekoweb = async () => {
     }
 
     uploadedBytes += chunk.length;
-    chunkIndex++;
   }
 
   console.log(`Uploaded ${uploadedBytes} bytes`);
