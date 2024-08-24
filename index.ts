@@ -41,7 +41,7 @@ const uploadToNekoweb = async () => {
 
   // Zip the folder
   const zipPath = path.join(__dirname, `${path.basename(NEKOWEB_FOLDER)}.zip`);
-  await zip(path.join(__dirname, DIRECTORY), zipPath);
+  await zip(path.join(__dirname, DIRECTORY), zipPath, {destPath: NEKOWEB_FOLDER});
 
   // Get the file size
   const fileBuffer = await fs.promises.readFile(zipPath);
