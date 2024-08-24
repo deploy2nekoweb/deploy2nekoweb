@@ -29,9 +29,9 @@ const uploadId = await genericRequest("/files/big/create", {
 console.log("Upload ID:", uploadId)
 
 const uuid = crypto.randomUUID()
-await zip(path.join(__dirname, DIRECTORY), `${uuid}.zip`)
+await zip(path.join(__dirname, DIRECTORY), `${path.basename(NEKOWEB_FOLDER)}.zip`)
 
-const fileSize = await fs.promises.stat(path.join(__dirname, `${uuid}.zip`)).then(stats => stats.size);
+const fileSize = await fs.promises.stat(path.join(__dirname, `${path.basename(NEKOWEB_FOLDER)}.zip`)).then(stats => stats.size);
 let numberOfChunks = Math.ceil(fileSize / MAX_CHUNK_SIZE);
 let chunkSize = Math.ceil(fileSize / numberOfChunks);
 
