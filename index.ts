@@ -7,10 +7,11 @@ import axios from 'axios';
 const API_URL = "https://nekoweb.org/api";
 
 const uploadToNekoweb = async () => {
-  const { NEKOWEB_API_KEY, NEKOWEB_FOLDER, DIRECTORY } = process.env;
+  const { NEKOWEB_API_KEY, NEKOWEB_COOKIE, NEKOWEB_FOLDER, DIRECTORY } = process.env;
   if (!NEKOWEB_API_KEY) throw new Error("API key not found");
   if (!NEKOWEB_FOLDER) throw new Error("Folder not found");
   if (!DIRECTORY) throw new Error("Directory not found");
+  if (!NEKOWEB_COOKIE) NEKOWEB_COOKIE = false;
 
   const MAX_CHUNK_SIZE = Number(process.env.MAX_CHUNK_SIZE) || 100 * 1024 * 1024;
   const MIN_CHUNK_SIZE = Number(process.env.MIN_CHUNK_SIZE) || 10 * 1024 * 1024;
@@ -108,6 +109,21 @@ const uploadToNekoweb = async () => {
       method: "POST",
       headers: { Authorization: NEKOWEB_API_KEY },
     });
+
+    if (NEKOWEB_COOKIE) {
+     await genericRequest("/files/edit", {
+       method: "POST",
+       body: {
+         pathname: "index.html",
+         content: `<!-- ${Date.now()} -->`
+       },
+       headers: {
+         "User-Agent": "deploy2nekoweb build script (please don't ban us)",
+         "Content-Type": "multipart/form-data",
+          Referer: `https://nekoweb.org/?${encodeURIComponent("deploy2nekoweb build script (please dont ban us)")}`,
+          Cookie: `token=${NEKOWEB_COOKIE}`,
+       });
+    }
 
     console.log("Upload finalized successfully.");
   } catch (error) {
