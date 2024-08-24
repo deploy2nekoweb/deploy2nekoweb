@@ -27,8 +27,6 @@ const uploadId = await genericRequest("/files/big/create", {
 }).then(res => res.json()).then(data => data.id)
 
 console.log("Upload ID:", uploadId)
-
-const uuid = crypto.randomUUID()
 await zip(path.join(__dirname, DIRECTORY), `${path.basename(NEKOWEB_FOLDER)}.zip`)
 
 const fileSize = await fs.promises.stat(path.join(__dirname, `${path.basename(NEKOWEB_FOLDER)}.zip`)).then(stats => stats.size);
@@ -64,7 +62,7 @@ for await (const chunk of stream) {
       ...formData.getHeaders(),
       Authorization: NEKOWEB_API_KEY
     },
-    body: formData
+    body: formData.getBuffer()
   })
 
   console.log(chunk)
