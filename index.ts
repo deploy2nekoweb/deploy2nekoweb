@@ -21,7 +21,7 @@ console.log("Uploading files to Nekoweb...")
 
 const genericRequest = async (url: string, options: RequestInit): Promise<Response> => {
   const response = await fetch(API_URL + url, options)
-  if (!response.ok) throw new Error(`Failed to fetch ${url}\n${response.statusText}\n${await response.text()}`)
+  if (!response.ok) console.error(`Failed to fetch ${url}\n${response.statusText}\n${await response.text()}`)
   return response
 }
 
