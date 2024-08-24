@@ -7,7 +7,7 @@ import axios from 'axios';
 const API_URL = "https://nekoweb.org/api";
 
 const uploadToNekoweb = async () => {
-  const { NEKOWEB_API_KEY, NEKOWEB_COOKIE, NEKOWEB_FOLDER, DIRECTORY } = process.env;
+  let { NEKOWEB_API_KEY, NEKOWEB_COOKIE, NEKOWEB_FOLDER, DIRECTORY } = process.env;
   if (!NEKOWEB_API_KEY) throw new Error("API key not found");
   if (!NEKOWEB_FOLDER) throw new Error("Folder not found");
   if (!DIRECTORY) throw new Error("Directory not found");
