@@ -8,7 +8,7 @@ const API_URL = "https://nekoweb.org/api";
 
 const uploadToNekoweb = async () => {
   const { NEKOWEB_API_KEY, NEKOWEB_FOLDER, DIRECTORY } = process.env;
-  let NEKOWEB_COOKIE: string | undefined = process.env.NEKOWEB_COOKIE;
+  const NEKOWEB_COOKIE: string | undefined = process.env.NEKOWEB_COOKIE;
   if (!NEKOWEB_API_KEY) throw new Error("API key not found");
   if (!NEKOWEB_FOLDER) throw new Error("Folder not found");
   if (!DIRECTORY) throw new Error("Directory not found");
@@ -110,48 +110,43 @@ const uploadToNekoweb = async () => {
         Authorization: NEKOWEB_API_KEY,
         "Content-Type": "application/x-www-form-urlencoded",
       },
-      data: "pathname=" + NEKOWEB_FOLDER,
+      data: `pathname=${NEKOWEB_FOLDER}`,
     });
   } catch (e) {}
+
   // Finalize the upload
-  try {
-    await genericRequest(`/files/import/${uploadId}`, {
+  await genericRequest(`/files/import/${uploadId}`, {
+    method: "POST",
+    headers: { Authorization: NEKOWEB_API_KEY },
+  });
+
+  if (NEKOWEB_COOKIE) {
+    await genericRequest("/files/edit", {
       method: "POST",
-      headers: { Authorization: NEKOWEB_API_KEY },
+      body: {
+        pathname: "index.html",
+        content: `<!-- ${Date.now()} -->`,
+      },
+      headers: {
+        "User-Agent": "deploy2nekoweb build script (please don't ban us)",
+        "Content-Type": "multipart/form-data",
+        Referer: `https://nekoweb.org/?${encodeURIComponent(
+          "deploy2nekoweb build script (please dont ban us)"
+        )}`,
+        Cookie: `token=${NEKOWEB_COOKIE}`,
+      },
     });
-
-    if (NEKOWEB_COOKIE) {
-      await genericRequest("/files/edit", {
-        method: "POST",
-        body: {
-          pathname: "index.html",
-          content: `<!-- ${Date.now()} -->`,
-        },
-        headers: {
-          "User-Agent": "deploy2nekoweb build script (please don't ban us)",
-          "Content-Type": "multipart/form-data",
-          Referer: `https://nekoweb.org/?${encodeURIComponent(
-            "deploy2nekoweb build script (please dont ban us)"
-          )}`,
-          Cookie: `token=${NEKOWEB_COOKIE}`,
-        },
-      });
-      console.log("Sent cookie request.");
-    }
-
-    console.log("Upload finalized successfully.");
-  } catch (error) {
-    console.error("Error finalizing upload:", error.message);
-    throw error;
+    console.log("Sent cookie request.");
   }
 
-  // Clean up the zip file
-  fs.rmSync(zipPath);
+  console.log("Upload finalized successfully.");
+  
+  await fs.promises.rm(zipPath);
 
   console.log("Upload completed and cleaned up.");
 };
 
 // Call the function to perform the upload
 uploadToNekoweb().catch((err) => {
-  throw new Error("An error occurred during the upload process:", err.message);
+  throw new Error(`An error occurred during the upload process: ${err.message}`);
 });
