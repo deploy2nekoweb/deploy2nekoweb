@@ -141,7 +141,7 @@ const uploadToNekoweb = async () => {
 
     console.log("Upload finalized successfully.");
   } catch (error) {
-    console.error("Error finalizing upload:", error);
+    console.error("Error finalizing upload:", error.message);
     throw error;
   }
 
