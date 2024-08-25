@@ -153,5 +153,5 @@ const uploadToNekoweb = async () => {
 
 // Call the function to perform the upload
 uploadToNekoweb().catch((err) => {
-  console.error("An error occurred during the upload process:", err.message);
+  throw new Error("An error occurred during the upload process:", err.message);
 });
