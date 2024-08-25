@@ -6,13 +6,46 @@ import axios from "axios";
 
 const API_URL = "https://nekoweb.org/api";
 
-const uploadToNekoweb = async () => {
-  const { NEKOWEB_API_KEY, NEKOWEB_FOLDER, DIRECTORY } = process.env;
-  const NEKOWEB_COOKIE: string | undefined = process.env.NEKOWEB_COOKIE;
-  if (!NEKOWEB_API_KEY) throw new Error("API key not found");
-  if (!NEKOWEB_FOLDER) throw new Error("Folder not found");
-  if (!DIRECTORY) throw new Error("Directory not found");
+const { NEKOWEB_API_KEY, NEKOWEB_FOLDER, DIRECTORY } = process.env;
+const NEKOWEB_COOKIE: string | undefined = process.env.NEKOWEB_COOKIE;
+if (!NEKOWEB_API_KEY) throw new Error("API key not found");
+if (!NEKOWEB_FOLDER) throw new Error("Folder not found");
+if (!DIRECTORY) throw new Error("Directory not found");
 
+interface ILimit {
+  limit: number
+  remaining: number
+  reset: number
+}
+interface IFileLimitsResponse {
+  general: ILimit
+  big_uploads: ILimit
+  zip: ILimit
+}
+
+const genericRequest = async (url: string, options: any): Promise<any> => {
+  try {
+    const response = await axios({
+      url: API_URL + url,
+      ...options,
+    });
+    return response.data;
+  } catch (error: any) {
+    console.error(
+      `Failed to fetch ${url}\n${error.message}`
+    );
+    throw error;
+  }
+};
+
+const getLimits = async (type: keyof IFileLimitsResponse) => {
+  const response: IFileLimitsResponse = await genericRequest('/files/limits', {
+    headers: { Authorization: NEKOWEB_API_KEY }
+  })
+  return response[type]
+}
+
+const uploadToNekoweb = async () => {
   const MAX_CHUNK_SIZE =
     Number(process.env.MAX_CHUNK_SIZE) || 100 * 1024 * 1024;
   const MIN_CHUNK_SIZE = Number(process.env.MIN_CHUNK_SIZE) || 10 * 1024 * 1024;
@@ -20,20 +53,10 @@ const uploadToNekoweb = async () => {
 
   console.log("Uploading files to Nekoweb...");
 
-  const genericRequest = async (url: string, options: any): Promise<any> => {
-    try {
-      const response = await axios({
-        url: API_URL + url,
-        ...options,
-      });
-      return response.data;
-    } catch (error: any) {
-      console.error(
-        `Failed to fetch ${url}\n${error.message}`
-      );
-      throw error;
-    }
-  };
+  const bigUploads = await getLimits('big_uploads')
+  if (bigUploads.remaining < 1) {
+    throw new Error(`Unable to upload to Nekoweb. No more big uploads allowed until ${new Date(bigUploads.reset)}.`)
+  }
 
   // Create an upload session
   const uploadId = await genericRequest("/files/big/create", {
@@ -103,6 +126,16 @@ const uploadToNekoweb = async () => {
   }
 
   console.log(`Uploaded ${uploadedBytes} bytes`);
+
+  const zipLimits = await getLimits('zip')
+  if (zipLimits.remaining < 1) {
+    throw new Error(`Unable to upload to Nekoweb. No more zip uploads allowed until ${new Date(zipLimits.reset)}.`)
+  }
+
+  const fileLimits = await getLimits('general')
+  if (fileLimits.remaining < 1) {
+    throw new Error(`Unable to upload to Nekoweb. No more file uploads allowed until ${new Date(fileLimits.reset)}.`)
+  }
 
   try {
     await genericRequest("/files/delete", {
