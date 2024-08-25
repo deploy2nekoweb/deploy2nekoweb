@@ -121,11 +121,11 @@ const uploadToNekoweb = async () => {
     headers: { Authorization: NEKOWEB_API_KEY },
   });
 
-  if (NEKOWEB_COOKIE) {
+  if (NEKOWEB_COOKIE != null) {
     await genericRequest("/files/edit", {
       method: "POST",
-      body: {
-        pathname: "index.html",
+      data: {
+        pathname: "/index.html",
         content: `<!-- ${Date.now()} -->`,
       },
       headers: {
