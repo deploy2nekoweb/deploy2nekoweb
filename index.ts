@@ -29,7 +29,7 @@ const uploadToNekoweb = async () => {
       return response.data;
     } catch (error: any) {
       console.error(
-        `Failed to fetch ${url}\n${error.message}\n${error.response?.data}`
+        `Failed to fetch ${url}\n${error.message}`
       );
       throw error;
     }
