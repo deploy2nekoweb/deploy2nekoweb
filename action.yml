@@ -28,14 +28,15 @@ runs:
 
     - run: |
         cd deploy2nekoweb
+        bun install
+        cd ../
+
         if [ -n "${{ inputs.nekoweb-cookie }}" ]; then
           export NEKOWEB_COOKIE="${{ inputs.nekoweb-cookie }}"
         fi
-        bun install
-        cd ../
+        export NEKOWEB_API_KEY="${{ inputs.nekoweb-api-key }}"
+        export NEKOWEB_FOLDER="${{ inputs.nekoweb-folder }}"
+        export DIRECTORY="${{ inputs.directory }}"
+        
         bun run ./deploy2nekoweb/index.ts
       shell: bash
-      env:
-        NEKOWEB_API_KEY: ${{ inputs.nekoweb-api-key }}
-        NEKOWEB_FOLDER: ${{ inputs.nekoweb-folder }}
-        DIRECTORY: ${{ inputs.directory }}
