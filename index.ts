@@ -1,4 +1,4 @@
-import fs from "fs";
+import fs from "fs/promises";
 import FormData from "form-data";
 import path from "path";
 import { zip } from "zip-a-folder";
@@ -50,7 +50,7 @@ const uploadToNekoweb = async () => {
   });
 
   // Get the file size
-  const fileBuffer = await fs.promises.readFile(zipPath);
+  const fileBuffer = await fs.readFile(zipPath);
   const fileSize = fileBuffer.length;
   let numberOfChunks = Math.ceil(fileSize / MAX_CHUNK_SIZE);
   let chunkSize = Math.ceil(fileSize / numberOfChunks);
@@ -141,12 +141,12 @@ const uploadToNekoweb = async () => {
 
   console.log("Upload finalized successfully.");
   
-  await fs.promises.rm(zipPath);
+  await fs.rm(zipPath);
 
   console.log("Upload completed and cleaned up.");
 };
 
 // Call the function to perform the upload
 uploadToNekoweb().catch((err) => {
-  throw new Error(`An error occurred during the upload process: ${err.message}`);
+  throw new Error(`An error occurred during the upload process: ${err.message}\n\nError info: ${err.stack}`);
 });
