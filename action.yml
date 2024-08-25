@@ -18,15 +18,13 @@ inputs:
 runs:
   using: 'composite'
   steps:
-    - uses: actions/checkout@v3
-
-    # Step to download the necessary files
     - name: Download deployment script
       run: |
         git clone --depth 1 https://github.com/deploy2nekoweb/deploy2nekoweb.git
       shell: bash
 
-    - uses: oven-sh/setup-bun@v2
+    - name: Setup bun
+      uses: oven-sh/setup-bun@v2
 
     - run: |
         cd deploy2nekoweb
