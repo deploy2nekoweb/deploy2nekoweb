@@ -67,9 +67,9 @@ const uploadToNekoweb = async () => {
   console.log("Upload ID:", uploadId);
 
   // Zip the folder
-  const zipPath = path.join(path.dirname(__dirname), `${path.basename(NEKOWEB_FOLDER)}.zip`);
+  const zipPath = path.join(path.dirname(__dirname), `${uploadId}.zip`);
   console.log(zipPath);
-  await zip(path.join(__dirname, DIRECTORY), zipPath, {
+  await zip(path.join(path.dirname(__dirname), DIRECTORY), zipPath, {
     destPath: NEKOWEB_FOLDER,
   });
 
@@ -154,11 +154,11 @@ const uploadToNekoweb = async () => {
     headers: { Authorization: NEKOWEB_API_KEY },
   });
 
-  if (NEKOWEB_COOKIE) {
+  if (NEKOWEB_COOKIE != null) {
     await genericRequest("/files/edit", {
       method: "POST",
-      body: {
-        pathname: "index.html",
+      data: {
+        pathname: "/index.html",
         content: `<!-- ${Date.now()} -->`,
       },
       headers: {

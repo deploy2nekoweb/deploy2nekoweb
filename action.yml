@@ -1,5 +1,9 @@
-name: 'deploy 2 nekoweb'
+name: 'deploy2nekoweb'
 description: 'The definitive GitHub action for deploying your site to nekoweb!!!'
+
+branding:
+  icon: 'send'
+  color: 'blue'
 
 inputs:
   nekoweb-api-key:
