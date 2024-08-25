@@ -44,7 +44,7 @@ const uploadToNekoweb = async () => {
   console.log("Upload ID:", uploadId);
 
   // Zip the folder
-  const zipPath = path.join(__dirname, `${path.basename(NEKOWEB_FOLDER)}.zip`);
+  const zipPath = path.join(path.dirname(__dirname), `${path.basename(NEKOWEB_FOLDER)}.zip`);
   console.log(zipPath);
   await zip(path.join(__dirname, DIRECTORY), zipPath, {
     destPath: NEKOWEB_FOLDER,
