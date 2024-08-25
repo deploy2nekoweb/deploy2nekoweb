@@ -45,6 +45,12 @@ const getLimits = async (type: keyof IFileLimitsResponse) => {
   return response[type]
 }
 
+const sleepUntil = (time: number) => {
+  const now = Date.now()
+  if (now >= time) return
+  return new Promise(resolve => setTimeout(resolve, time - now))
+}
+
 const uploadToNekoweb = async () => {
   const MAX_CHUNK_SIZE =
     Number(process.env.MAX_CHUNK_SIZE) || 100 * 1024 * 1024;
@@ -53,9 +59,9 @@ const uploadToNekoweb = async () => {
 
   console.log("Uploading files to Nekoweb...");
 
-  const bigUploads = await getLimits('big_uploads')
-  if (bigUploads.remaining < 1) {
-    throw new Error(`Unable to upload to Nekoweb. No more big uploads allowed until ${new Date(bigUploads.reset)}.`)
+  const bigUploadLimits = await getLimits('big_uploads')
+  if (bigUploadLimits.remaining < 1) {
+    await sleepUntil(bigUploadLimits.reset)
   }
 
   // Create an upload session
@@ -129,12 +135,12 @@ const uploadToNekoweb = async () => {
 
   const zipLimits = await getLimits('zip')
   if (zipLimits.remaining < 1) {
-    throw new Error(`Unable to upload to Nekoweb. No more zip uploads allowed until ${new Date(zipLimits.reset)}.`)
+    sleepUntil(zipLimits.reset)
   }
 
   const fileLimits = await getLimits('general')
   if (fileLimits.remaining < 1) {
-    throw new Error(`Unable to upload to Nekoweb. No more file uploads allowed until ${new Date(fileLimits.reset)}.`)
+    sleepUntil(fileLimits.reset)
   }
 
   try {
