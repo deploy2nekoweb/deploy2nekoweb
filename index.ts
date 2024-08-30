@@ -203,9 +203,7 @@ const uploadToNekoweb = async () => {
       },
       data: `pathname=${NEKOWEB_FOLDER}`,
     });
-  } catch (e) {
-    console.error("Error deleting files:", e);
-  }
+  } catch (e) {}
 
   await finalizeUpload(uploadId);
   await cleanUp(zipPath);
