@@ -53,7 +53,7 @@ const sleepUntil = (time: number) => {
 const createUploadSession = async () => {
   return await genericRequest("/files/big/create", {
     method: "GET",
-    headers: { Authorization: NEKOWEB_API_KEY },
+    headers: { ...getCreds() },
   }).then((data) => data.id);
 };
 
@@ -64,6 +64,14 @@ const zipDirectory = async (uploadId: string) => {
   });
   return zipPath;
 };
+
+const getCreds = () => {
+  if (!NEKOWEB_COOKIE) return {
+    Referer: `https://nekoweb.org/?${encodeURIComponent("deploy2nekoweb build script (please dont ban us)")}`,
+    Cookie: `token=${NEKOWEB_COOKIE}`
+  }
+  return { Authorization: NEKOWEB_API_KEY } 
+}
 
 const calculateChunks = (fileSize: number) => {
   const maxChunkSize = Number(MAX_CHUNK_SIZE) || 100 * 1024 * 1024;
@@ -103,7 +111,7 @@ const uploadChunks = async (uploadId: string, fileBuffer: Buffer, chunkSize: num
         method: "POST",
         headers: {
           ...formData.getHeaders(),
-          Authorization: NEKOWEB_API_KEY,
+          ...getCreds()
         },
         data: formData,
       });
@@ -190,7 +198,7 @@ const uploadToNekoweb = async () => {
     await genericRequest("/files/delete", {
       method: "POST",
       headers: {
-        Authorization: NEKOWEB_API_KEY,
+        ...getCreds(),
         "Content-Type": "application/x-www-form-urlencoded",
       },
       data: `pathname=${NEKOWEB_FOLDER}`,
