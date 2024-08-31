@@ -141,6 +141,8 @@ const finalizeUpload = async (uploadId: string) => {
         content: `<!-- ${Date.now()} -->`,
       },
       headers: {
+        Origin: 'https://nekoweb.org',
+        Host: 'nekoweb.org',
         "User-Agent": "deploy2nekoweb build script (please don't ban us)",
         "Content-Type": "multipart/form-data",
         Referer: `https://nekoweb.org/?${encodeURIComponent("deploy2nekoweb build script (please dont ban us)")}`,
