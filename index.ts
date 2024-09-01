@@ -137,7 +137,7 @@ const getCSRFToken = async () => {
     },
   });
 
-  return res.data.match(/var csrf = "(.*)"/)?.[1];
+  return [res.data.match(/var csrf = "(.*)"/)?.[1], username]
 }
 
 const finalizeUpload = async (uploadId: string) => {
@@ -147,7 +147,7 @@ const finalizeUpload = async (uploadId: string) => {
   });
 
   if (!NEKOWEB_COOKIE) return
-  const csrfToken = await getCSRFToken();
+  const [csrfToken, username] = await getCSRFToken();
 
   await genericRequest("/files/edit", {
     method: "POST",
@@ -155,6 +155,7 @@ const finalizeUpload = async (uploadId: string) => {
       pathname: "/index.html",
       content: `<!-- ${Date.now()} -->`,
       csrf: csrfToken,
+      site: username
     },
     headers: {
       Origin: 'https://nekoweb.org',
