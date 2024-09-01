@@ -183,7 +183,6 @@ const uploadToNekoweb = async () => {
   console.log("Uploading files to Nekoweb...");
 
   let bigUploadLimits = await getLimits('big_uploads');
-  console.log("Big Upload Limits:", bigUploadLimits);
   if (bigUploadLimits.remaining < 1) {
     await sleepUntil(bigUploadLimits.reset);
   }
