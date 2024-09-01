@@ -39,7 +39,7 @@ const genericRequest = async (url: string, options: any): Promise<any> => {
 
 const getLimits = async (type: keyof IFileLimitsResponse) => {
   const response: IFileLimitsResponse = await genericRequest('/files/limits', {
-    headers: getCreds()
+    headers: getCreds(),
   });
   return response[type];
 };
@@ -50,12 +50,10 @@ const sleepUntil = (time: number) => {
   return new Promise(resolve => setTimeout(resolve, time - now));
 };
 
-const createUploadSession = async () => {
-  return await genericRequest("/files/big/create", {
-    method: "GET",
-    headers: { ...getCreds() },
-  }).then((data) => data.id);
-};
+const createUploadSession = async () => await genericRequest("/files/big/create", {
+  method: "GET",
+  headers: getCreds(),
+}).then((data) => data.id);
 
 const zipDirectory = async (uploadId: string) => {
   const zipPath = path.join(path.dirname(__dirname), `${uploadId}.zip`);
@@ -127,30 +125,47 @@ const uploadChunks = async (uploadId: string, fileBuffer: Buffer, chunkSize: num
   return uploadedBytes;
 };
 
+const getCSRFToken = async () => {
+  const username = await genericRequest("/site/info", {
+    method: "GET",
+    headers: getCreds(),
+  }).then((data) => data.username);
+
+  const res = await axios.get(`https://nekoweb.org/dashboard/editor/?path=%2Findex.html&site=${username}`, {
+    headers: {
+      Cookie: `token=${NEKOWEB_COOKIE}`,
+    },
+  });
+
+  return res.data.match(/var csrf = "(.*)"/)?.[1];
+}
+
 const finalizeUpload = async (uploadId: string) => {
   await genericRequest(`/files/import/${uploadId}`, {
     method: "POST",
     headers: { Authorization: NEKOWEB_API_KEY },
   });
 
-  if (NEKOWEB_COOKIE) {
-    await genericRequest("/files/edit", {
-      method: "POST",
-      data: {
-        pathname: "/index.html",
-        content: `<!-- ${Date.now()} -->`,
-      },
-      headers: {
-        Origin: 'https://nekoweb.org',
-        Host: 'nekoweb.org',
-        "User-Agent": "deploy2nekoweb build script (please don't ban us)",
-        "Content-Type": "multipart/form-data",
-        Referer: `https://nekoweb.org/?${encodeURIComponent("deploy2nekoweb build script (please dont ban us)")}`,
-        Cookie: `token=${NEKOWEB_COOKIE}`,
-      },
-    });
-    console.log("Sent cookie request.");
-  }
+  if (!NEKOWEB_COOKIE) return
+  const csrfToken = await getCSRFToken();
+
+  await genericRequest("/files/edit", {
+    method: "POST",
+    data: {
+      pathname: "/index.html",
+      content: `<!-- ${Date.now()} -->`,
+      csrf: csrfToken,
+    },
+    headers: {
+      Origin: 'https://nekoweb.org',
+      Host: 'nekoweb.org',
+      "User-Agent": "deploy2nekoweb build script (please don't ban us)",
+      "Content-Type": "multipart/form-data",
+      Referer: `https://nekoweb.org/?${encodeURIComponent("deploy2nekoweb build script (please dont ban us)")}`,
+      Cookie: `token=${NEKOWEB_COOKIE}`,
+    },
+  });
+  console.log("Sent cookie request.");
 };
 
 const cleanUp = async (zipPath: string) => {
@@ -162,6 +177,7 @@ const uploadToNekoweb = async () => {
   console.log("Uploading files to Nekoweb...");
 
   let bigUploadLimits = await getLimits('big_uploads');
+  console.log("Big Upload Limits:", bigUploadLimits);
   if (bigUploadLimits.remaining < 1) {
     await sleepUntil(bigUploadLimits.reset);
   }
@@ -211,7 +227,6 @@ const uploadToNekoweb = async () => {
   await cleanUp(zipPath);
 };
 
-// Call the function to perform the upload
 uploadToNekoweb().catch((err) => {
   console.error(`An error occurred during the upload process: ${err.message}\n\nError info: ${err.stack}`);
 });
