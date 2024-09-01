@@ -131,13 +131,18 @@ const getCSRFToken = async () => {
     headers: getCreds(),
   }).then((data) => data.username);
 
-  const res = await axios.get(`https://nekoweb.org/dashboard/editor/?path=%2Findex.html&site=${username}`, {
+  const res = await genericRequest('/csrf', {
+    method: "GET",
     headers: {
+      Origin: 'https://nekoweb.org',
+      Host: 'nekoweb.org',
+      "User-Agent": "deploy2nekoweb build script (please don't ban us)",
+      Referer: `https://nekoweb.org/?${encodeURIComponent("deploy2nekoweb build script (please dont ban us)")}`,
       Cookie: `token=${NEKOWEB_COOKIE}`,
-    },
-  });
+    }
+  })
 
-  return [res.data.match(/var csrf = "(.*)"/)?.[1], username]
+  return [res, username]
 }
 
 const finalizeUpload = async (uploadId: string) => {
