@@ -72,7 +72,7 @@ const zipDirectory = async (uploadId: string) => {
 };
 
 const getCreds = () => {
-  if (!NEKOWEB_COOKIE)
+  if (NEKOWEB_COOKIE)
     return {
       Referer: `https://nekoweb.org/?${encodeURIComponent(
         "deploy2nekoweb build script (please dont ban us)"
