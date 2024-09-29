@@ -5,7 +5,14 @@ import { zip } from "zip-a-folder";
 import axios from "axios";
 
 const API_URL = "https://nekoweb.org/api";
-const { NEKOWEB_API_KEY, NEKOWEB_FOLDER, DIRECTORY, MAX_CHUNK_SIZE, MIN_CHUNK_SIZE, MIN_CHUNKS } = process.env;
+const {
+  NEKOWEB_API_KEY,
+  NEKOWEB_FOLDER,
+  DIRECTORY,
+  MAX_CHUNK_SIZE,
+  MIN_CHUNK_SIZE,
+  MIN_CHUNKS,
+} = process.env;
 const NEKOWEB_COOKIE: string | undefined = process.env.NEKOWEB_COOKIE;
 
 if (!NEKOWEB_API_KEY) throw new Error("API key not found");
@@ -38,7 +45,7 @@ const genericRequest = async (url: string, options: any): Promise<any> => {
 };
 
 const getLimits = async (type: keyof IFileLimitsResponse) => {
-  const response: IFileLimitsResponse = await genericRequest('/files/limits', {
+  const response: IFileLimitsResponse = await genericRequest("/files/limits", {
     headers: getCreds(),
   });
   return response[type];
@@ -47,13 +54,14 @@ const getLimits = async (type: keyof IFileLimitsResponse) => {
 const sleepUntil = (time: number) => {
   const now = Date.now();
   if (now >= time) return;
-  return new Promise(resolve => setTimeout(resolve, time - now));
+  return new Promise((resolve) => setTimeout(resolve, time - now));
 };
 
-const createUploadSession = async () => await genericRequest("/files/big/create", {
-  method: "GET",
-  headers: getCreds(),
-}).then((data) => data.id);
+const createUploadSession = async () =>
+  await genericRequest("/files/big/create", {
+    method: "GET",
+    headers: getCreds(),
+  }).then((data) => data.id);
 
 const zipDirectory = async (uploadId: string) => {
   const zipPath = path.join(path.dirname(__dirname), `${uploadId}.zip`);
@@ -64,12 +72,15 @@ const zipDirectory = async (uploadId: string) => {
 };
 
 const getCreds = () => {
-  if (!NEKOWEB_COOKIE) return {
-    Referer: `https://nekoweb.org/?${encodeURIComponent("deploy2nekoweb build script (please dont ban us)")}`,
-    Cookie: `token=${NEKOWEB_COOKIE}`
-  }
-  return { Authorization: NEKOWEB_API_KEY } 
-}
+  if (!NEKOWEB_COOKIE)
+    return {
+      Referer: `https://nekoweb.org/?${encodeURIComponent(
+        "deploy2nekoweb build script (please dont ban us)"
+      )}`,
+      Cookie: `token=${NEKOWEB_COOKIE}`,
+    };
+  return { Authorization: NEKOWEB_API_KEY };
+};
 
 const calculateChunks = (fileSize: number) => {
   const maxChunkSize = Number(MAX_CHUNK_SIZE) || 100 * 1024 * 1024;
@@ -92,7 +103,12 @@ const calculateChunks = (fileSize: number) => {
   return { chunkSize, numberOfChunks };
 };
 
-const uploadChunks = async (uploadId: string, fileBuffer: Buffer, chunkSize: number, numberOfChunks: number) => {
+const uploadChunks = async (
+  uploadId: string,
+  fileBuffer: Buffer,
+  chunkSize: number,
+  numberOfChunks: number
+) => {
   let uploadedBytes = 0;
 
   for (let chunkIndex = 0; chunkIndex < numberOfChunks; chunkIndex++) {
@@ -109,7 +125,7 @@ const uploadChunks = async (uploadId: string, fileBuffer: Buffer, chunkSize: num
         method: "POST",
         headers: {
           ...formData.getHeaders(),
-          ...getCreds()
+          ...getCreds(),
         },
         data: formData,
       });
@@ -131,19 +147,21 @@ const getCSRFToken = async () => {
     headers: getCreds(),
   }).then((data) => data.username);
 
-  const res = await genericRequest('/csrf', {
+  const res = await genericRequest("/csrf", {
     method: "GET",
     headers: {
-      Origin: 'https://nekoweb.org',
-      Host: 'nekoweb.org',
+      Origin: "https://nekoweb.org",
+      Host: "nekoweb.org",
       "User-Agent": "deploy2nekoweb build script (please don't ban us)",
-      Referer: `https://nekoweb.org/?${encodeURIComponent("deploy2nekoweb build script (please dont ban us)")}`,
+      Referer: `https://nekoweb.org/?${encodeURIComponent(
+        "deploy2nekoweb build script (please dont ban us)"
+      )}`,
       Cookie: `token=${NEKOWEB_COOKIE}`,
-    }
-  })
+    },
+  });
 
-  return [res, username]
-}
+  return [res, username];
+};
 
 const finalizeUpload = async (uploadId: string) => {
   await genericRequest(`/files/import/${uploadId}`, {
@@ -151,7 +169,7 @@ const finalizeUpload = async (uploadId: string) => {
     headers: { Authorization: NEKOWEB_API_KEY },
   });
 
-  if (!NEKOWEB_COOKIE) return
+  /* if (!NEKOWEB_COOKIE) return
   const [csrfToken, username] = await getCSRFToken();
 
   await genericRequest("/files/edit", {
@@ -171,7 +189,7 @@ const finalizeUpload = async (uploadId: string) => {
       Cookie: `token=${NEKOWEB_COOKIE}`,
     },
   });
-  console.log("Sent cookie request.");
+  console.log("Sent cookie request.");*/
 };
 
 const cleanUp = async (zipPath: string) => {
@@ -182,7 +200,7 @@ const cleanUp = async (zipPath: string) => {
 const uploadToNekoweb = async () => {
   console.log("Uploading files to Nekoweb...");
 
-  let bigUploadLimits = await getLimits('big_uploads');
+  let bigUploadLimits = await getLimits("big_uploads");
   if (bigUploadLimits.remaining < 1) {
     await sleepUntil(bigUploadLimits.reset);
   }
@@ -197,22 +215,29 @@ const uploadToNekoweb = async () => {
   const fileSize = fileBuffer.length;
   const { chunkSize, numberOfChunks } = calculateChunks(fileSize);
 
-  console.log(`File Size: ${fileSize} bytes, Chunk Size: ${chunkSize}, Number of Chunks: ${numberOfChunks}`);
+  console.log(
+    `File Size: ${fileSize} bytes, Chunk Size: ${chunkSize}, Number of Chunks: ${numberOfChunks}`
+  );
 
-  const uploadedBytes = await uploadChunks(uploadId, fileBuffer, chunkSize, numberOfChunks);
+  const uploadedBytes = await uploadChunks(
+    uploadId,
+    fileBuffer,
+    chunkSize,
+    numberOfChunks
+  );
   console.log(`Uploaded ${uploadedBytes} bytes`);
 
-  bigUploadLimits = await getLimits('big_uploads');
+  bigUploadLimits = await getLimits("big_uploads");
   if (bigUploadLimits.remaining < 1) {
     await sleepUntil(bigUploadLimits.reset);
   }
 
-  const zipLimits = await getLimits('zip');
+  const zipLimits = await getLimits("zip");
   if (zipLimits.remaining < 1) {
     await sleepUntil(zipLimits.reset);
   }
 
-  const fileLimits = await getLimits('general');
+  const fileLimits = await getLimits("general");
   if (fileLimits.remaining < 1) {
     await sleepUntil(fileLimits.reset);
   }
@@ -233,5 +258,7 @@ const uploadToNekoweb = async () => {
 };
 
 uploadToNekoweb().catch((err) => {
-  console.error(`An error occurred during the upload process: ${err.message}\n\nError info: ${err.stack}`);
+  console.error(
+    `An error occurred during the upload process: ${err.message}\n\nError info: ${err.stack}`
+  );
 });
