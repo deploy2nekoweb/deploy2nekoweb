@@ -169,7 +169,7 @@ const finalizeUpload = async (uploadId: string) => {
     headers: { Authorization: NEKOWEB_API_KEY },
   });
 
-  /* if (!NEKOWEB_COOKIE) return
+  if (!NEKOWEB_COOKIE) return;
   const [csrfToken, username] = await getCSRFToken();
 
   await genericRequest("/files/edit", {
@@ -178,18 +178,20 @@ const finalizeUpload = async (uploadId: string) => {
       pathname: "/index.html",
       content: `<!-- ${Date.now()} -->`,
       csrf: csrfToken,
-      site: username
+      site: username,
     },
     headers: {
-      Origin: 'https://nekoweb.org',
-      Host: 'nekoweb.org',
+      Origin: "https://nekoweb.org",
+      Host: "nekoweb.org",
       "User-Agent": "deploy2nekoweb build script (please don't ban us)",
       "Content-Type": "multipart/form-data",
-      Referer: `https://nekoweb.org/?${encodeURIComponent("deploy2nekoweb build script (please dont ban us)")}`,
+      Referer: `https://nekoweb.org/?${encodeURIComponent(
+        "deploy2nekoweb build script (please dont ban us)"
+      )}`,
       Cookie: `token=${NEKOWEB_COOKIE}`,
     },
   });
-  console.log("Sent cookie request.");*/
+  console.log("Sent cookie request.");
 };
 
 const cleanUp = async (zipPath: string) => {
