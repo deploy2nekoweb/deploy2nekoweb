@@ -13,7 +13,7 @@ const {
   MIN_CHUNK_SIZE,
   MIN_CHUNKS,
 } = process.env;
-const NEKOWEB_COOKIE: string | undefined = process.env.NEKOWEB_COOKIE || undefined;
+let NEKOWEB_COOKIE: string | undefined = process.env.NEKOWEB_COOKIE;
 
 if (!NEKOWEB_API_KEY) throw new Error("API key not found");
 if (!NEKOWEB_FOLDER) throw new Error("Folder not found");
@@ -85,8 +85,10 @@ try {
   await getLimits('big_uploads')
 } catch(e) {
   console.log('---')
-  console.error('it seems as though there is an issue with authentication, try re-entering your cookie!')
+  console.warn('it seems as though there is an issue with authentication, try re-entering your cookie!')
+  console.warn('disabling cookie...')
   console.log('---')
+  NEKOWEB_COOKIE = undefined
 }
 
 const calculateChunks = (fileSize: number) => {
