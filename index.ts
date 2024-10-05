@@ -51,12 +51,6 @@ const getLimits = async (type: keyof IFileLimitsResponse) => {
   return response[type];
 };
 
-try {
-  getLimits('big_uploads')
-} catch(e) {
-  console.error('it seems as though there is an issue with authentication, try re-entering your cookie!')
-}
-
 const sleepUntil = (time: number) => {
   const now = Date.now();
   if (now >= time) return;
@@ -86,6 +80,12 @@ const getCreds = () => {
     };
   return { Authorization: NEKOWEB_API_KEY };
 };
+
+try {
+  getLimits('big_uploads')
+} catch(e) {
+  console.error('it seems as though there is an issue with authentication, try re-entering your cookie!')
+}
 
 const calculateChunks = (fileSize: number) => {
   const maxChunkSize = Number(MAX_CHUNK_SIZE) || 100 * 1024 * 1024;
