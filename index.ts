@@ -13,7 +13,7 @@ const {
   MIN_CHUNK_SIZE,
   MIN_CHUNKS,
 } = process.env;
-const NEKOWEB_COOKIE: string | undefined = process.env.NEKOWEB_COOKIE;
+const NEKOWEB_COOKIE: string | undefined = process.env.NEKOWEB_COOKIE || undefined;
 
 if (!NEKOWEB_API_KEY) throw new Error("API key not found");
 if (!NEKOWEB_FOLDER) throw new Error("Folder not found");
