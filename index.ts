@@ -82,7 +82,7 @@ const getCreds = () => {
 };
 
 try {
-  getLimits('big_uploads')
+  await getLimits('big_uploads')
 } catch(e) {
   console.error('it seems as though there is an issue with authentication, try re-entering your cookie!')
 }
