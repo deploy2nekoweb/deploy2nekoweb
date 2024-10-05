@@ -84,7 +84,9 @@ const getCreds = () => {
 try {
   await getLimits('big_uploads')
 } catch(e) {
+  console.log('---')
   console.error('it seems as though there is an issue with authentication, try re-entering your cookie!')
+  console.log('---')
 }
 
 const calculateChunks = (fileSize: number) => {
