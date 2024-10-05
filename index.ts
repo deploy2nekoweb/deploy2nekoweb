@@ -46,10 +46,16 @@ const genericRequest = async (url: string, options: any): Promise<any> => {
 
 const getLimits = async (type: keyof IFileLimitsResponse) => {
   const response: IFileLimitsResponse = await genericRequest("/files/limits", {
-    headers: { Authorization: NEKOWEB_API_KEY }
+    headers: getCreds()
   });
   return response[type];
 };
+
+try {
+  getLimits('big_uploads')
+} catch(e) {
+  console.error('it seems as though there is an issue with authentication, try re-entering your cookie!')
+}
 
 const sleepUntil = (time: number) => {
   const now = Date.now();
