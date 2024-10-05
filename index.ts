@@ -45,6 +45,7 @@ const genericRequest = async (url: string, options: any): Promise<any> => {
 };
 
 const getLimits = async (type: keyof IFileLimitsResponse) => {
+  console.log('getting limits for', type)
   const response: IFileLimitsResponse = await genericRequest("/files/limits", {
     headers: getCreds(),
   });
@@ -72,8 +73,8 @@ const zipDirectory = async (uploadId: string) => {
 };
 
 const getCreds = () => {
-  if (NEKOWEB_COOKIE)
-    return {
+  console.log('creds', NEKOWEB_COOKIE)
+  if (NEKOWEB_COOKIE) return {
       Referer: `https://nekoweb.org/?${encodeURIComponent(
         "deploy2nekoweb build script (please dont ban us)"
       )}`,
