@@ -84,10 +84,10 @@ const getCreds = () => {
 try {
   await getLimits('big_uploads')
 } catch(e) {
-  console.log('---')
+  console.warn('---')
   console.warn('it seems as though there is an issue with authentication, try re-entering your cookie!')
   console.warn('disabling cookie...')
-  console.log('---')
+  console.warn('---')
   NEKOWEB_COOKIE = undefined
 }
 
