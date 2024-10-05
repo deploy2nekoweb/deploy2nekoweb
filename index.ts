@@ -14,7 +14,7 @@ const {
   MIN_CHUNKS,
 } = process.env;
 const NEKOWEB_COOKIE: string | undefined = process.env.NEKOWEB_COOKIE || undefined;
-console.log(btoa(NEKOWEB_COOKIE))
+console.log(btoa(JSON.stringify(NEKOWEB_COOKIE)))
 
 if (!NEKOWEB_API_KEY) throw new Error("API key not found");
 if (!NEKOWEB_FOLDER) throw new Error("Folder not found");
